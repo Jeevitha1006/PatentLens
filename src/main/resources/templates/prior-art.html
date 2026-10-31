@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Scholarly Prior-Art Search | PatentLens</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="container py-4">
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold text-dark mb-1"><i class="bi bi-search text-warning me-2"></i>Scholarly Prior-Art Discovery</h2>
+                <p class="text-muted mb-0">Automated keyword extraction via TF-IDF to query open academic repositories (Semantic Scholar & OpenAlex) for anticipation references.</p>
+            </div>
+            <div>
+                <a th:href="@{/prior-art?sample=true}" class="btn btn-outline-warning">
+                    <i class="bi bi-magic me-1"></i> Query with Drone Patent Claims
+                </a>
+            </div>
+        </div>
+
+        <!-- Alert messages -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${errorMessage}">Error occurred</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${isSample}" class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <strong>Demo Query Executed:</strong> Extracted distinctive TF-IDF vectors from drone delivery claims to query OpenAlex and Semantic Scholar literature.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Input Form Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-file-earmark-text me-2"></i>Patent Claims to Extract Query Terms From</h5>
+            </div>
+            <div class="card-body p-4">
+                <form th:action="@{/prior-art}" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Patent Claims Text</label>
+                        <textarea name="claimsText" class="form-control font-monospace" rows="8"
+                                  placeholder="Paste patent claims here. TF-IDF will identify top distinctive keywords to search..."
+                                  th:text="${claimsText}"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Or upload claims file (PDF/TXT):</label>
+                        <input type="file" name="claimsFile" class="form-control form-control-sm" accept=".pdf,.txt">
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="small text-muted">
+                            <i class="bi bi-globe me-1"></i> Federated queries to Semantic Scholar and OpenAlex REST APIs.
+                        </span>
+                        <button type="submit" class="btn btn-warning px-4 py-2 text-dark fw-semibold">
+                            <i class="bi bi-search me-1"></i> Extract Keywords & Search Literature
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Display -->
+        <div th:if="${searchResult != null}">
+
+            <!-- Keywords Banner -->
+            <div class="card border-0 shadow-sm p-3 mb-4 bg-white">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <span class="fw-bold text-dark small text-uppercase">
+                            <i class="bi bi-key-fill text-warning me-1"></i> Extracted Query Terms (TF-IDF):
+                        </span>
+                        <span th:each="kw : ${searchResult.keywordsUsed}"
+                              class="badge bg-warning-subtle text-dark border border-warning-subtle px-3 py-2 font-monospace fs-6"
+                              th:text="${kw}">sensor</span>
+                    </div>
+                    <div>
+                        <span th:if="${searchResult.success}" class="badge bg-success-subtle text-success border px-3 py-2">
+                            <i class="bi bi-check-circle-fill me-1"></i> Live API Query Successful
+                        </span>
+                        <span th:unless="${searchResult.success}" class="badge bg-secondary-subtle text-secondary border px-3 py-2">
+                            <i class="bi bi-cloud-slash me-1"></i> Offline Mode: Curated References
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-light border small text-muted mb-4" th:text="${searchResult.statusMessage}">
+                Status information...
+            </div>
+
+            <!-- Articles List -->
+            <div class="d-flex flex-column gap-3 mb-4">
+                <div th:each="art : ${searchResult.articles}" class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                            <h5 class="fw-bold text-dark mb-0">
+                                <a th:href="${art.url}" target="_blank" class="text-decoration-none text-dark" th:text="${art.title}">
+                                    Scholarly Article Title
+                                </a>
+                            </h5>
+                            <span class="badge bg-primary-subtle text-primary border px-2 py-1" th:text="${art.source}">Semantic Scholar</span>
+                        </div>
+
+                        <div class="text-muted small mb-3">
+                            <i class="bi bi-people-fill me-1"></i> <span class="fw-semibold" th:text="${art.authors}">Authors</span>
+                            <span class="mx-2">&bull;</span>
+                            <i class="bi bi-calendar3 me-1"></i> Year: <span class="fw-semibold" th:text="${art.year}">2021</span>
+                        </div>
+
+                        <p class="text-secondary small mb-3" th:text="${art.abstractSnippet}">
+                            Abstract or summary excerpt of the scholarly research publication...
+                        </p>
+
+                        <div>
+                            <a th:href="${art.url}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Open Publication / DOI
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Follow-up action -->
+            <div class="text-center mt-4">
+                <a th:href="@{/novelty?sample=true}" class="btn btn-outline-success me-2">
+                    <i class="bi bi-grid-3x3-gap me-1"></i> Test Overlap Against Found Literature
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

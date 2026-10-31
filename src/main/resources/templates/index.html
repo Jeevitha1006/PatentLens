@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Dashboard | PatentLens</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-info text-dark mb-2 px-3 py-2 fw-bold">USPTO & PCT COMPLIANT ARCHITECTURE</span>
+                    <h1 class="display-5 fw-bold mb-2">PatentLens Prosecution Suite</h1>
+                    <p class="lead text-light opacity-75 mb-3">
+                        AI-powered patent rejection analysis, side-by-side claim diffing, TF-IDF novelty heatmaps,
+                        and SHA-256 Proof-of-Invention blockchain verification.
+                    </p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a th:href="@{/compare?sample=true}" class="btn btn-primary btn-sm px-3 py-2">
+                            <i class="bi bi-play-circle-fill me-1"></i> Quick 1-Click Demo
+                        </a>
+                        <a th:href="@{/rejection?sample=true}" class="btn btn-outline-light btn-sm px-3 py-2">
+                            <i class="bi bi-cpu me-1"></i> Demo Rejection Explainer
+                        </a>
+                        <a th:href="@{/blockchain}" class="btn btn-outline-info btn-sm px-3 py-2">
+                            <i class="bi bi-link-45deg me-1"></i> View Blockchain
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center d-none d-lg-block">
+                    <div class="p-4 bg-dark bg-opacity-50 rounded-4 border border-secondary border-opacity-50">
+                        <i class="bi bi-shield-check display-3 text-info"></i>
+                        <h5 class="mt-2 text-light">100% Offline Capable</h5>
+                        <p class="small text-secondary mb-0">Local H2 persistence, in-memory NLP TF-IDF, and resilient mock AI fallbacks.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Container -->
+    <div class="container mb-5">
+
+        <!-- Stat Cards Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card metric-card shadow-sm p-3 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Blockchain Height</span>
+                            <h2 class="fw-bold mb-0 text-dark" th:text="${blockCount}">1</h2>
+                        </div>
+                        <div class="p-3 bg-primary bg-opacity-10 rounded-circle text-primary">
+                            <i class="bi bi-link-45deg fs-3"></i>
+                        </div>
+                    </div>
+                    <span class="small text-muted mt-2"><i class="bi bi-check-circle-fill text-success"></i> SHA-256 PoW Anchors</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card shadow-sm p-3 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Analyses Completed</span>
+                            <h2 class="fw-bold mb-0 text-dark" th:text="${analysisCount}">0</h2>
+                        </div>
+                        <div class="p-3 bg-info bg-opacity-10 rounded-circle text-info">
+                            <i class="bi bi-journal-check fs-3"></i>
+                        </div>
+                    </div>
+                    <span class="small text-muted mt-2"><i class="bi bi-clock-history text-info"></i> In H2 Persistent Store</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card shadow-sm p-3 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Rejection Grounds</span>
+                            <h2 class="fw-bold mb-0 text-dark">4</h2>
+                        </div>
+                        <div class="p-3 bg-danger bg-opacity-10 rounded-circle text-danger">
+                            <i class="bi bi-exclamation-octagon fs-3"></i>
+                        </div>
+                    </div>
+                    <span class="small text-muted mt-2">35 USC 101, 102, 103, 112</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card shadow-sm p-3 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">NLP Scoring Engine</span>
+                            <h2 class="fw-bold mb-0 text-dark">TF-IDF</h2>
+                        </div>
+                        <div class="p-3 bg-success bg-opacity-10 rounded-circle text-success">
+                            <i class="bi bi-diagram-3 fs-3"></i>
+                        </div>
+                    </div>
+                    <span class="small text-muted mt-2">Cosine Similarity Vectors</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suite Modules Grid -->
+        <div class="row g-4 mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-grid-fill text-primary me-2"></i>Prosecution Modules</h4>
+            </div>
+
+            <!-- 1. Upload & Compare -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 p-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="p-2 bg-primary bg-opacity-10 text-primary rounded-3 me-3">
+                                <i class="bi bi-layout-split fs-4"></i>
+                            </div>
+                            <h5 class="card-title fw-bold mb-0">Upload & Compare</h5>
+                        </div>
+                        <p class="card-text text-muted small">
+                            Extract patent claims via regex, parse PDF or TXT drafts, and inspect side-by-side claim diffs with token-level highlighting.
+                        </p>
+                        <div class="d-flex gap-2 mt-3">
+                            <a th:href="@{/compare}" class="btn btn-outline-primary btn-sm">Launch Tool</a>
+                            <a th:href="@{/compare?sample=true}" class="btn btn-sm btn-light text-primary border">Demo Sample</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Rejection Explainer -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 p-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="p-2 bg-danger bg-opacity-10 text-danger rounded-3 me-3">
+                                <i class="bi bi-cpu fs-4"></i>
+                            </div>
+                            <h5 class="card-title fw-bold mb-0">Rejection Explainer</h5>
+                        </div>
+                        <p class="card-text text-muted small">
+                            Detects 35 USC 101, 102, 103, 112 rejection grounds, identifies cited prior art citations, and provides plain-English claim amendments.
+                        </p>
+                        <div class="d-flex gap-2 mt-3">
+                            <a th:href="@{/rejection}" class="btn btn-outline-danger btn-sm">Launch Tool</a>
+                            <a th:href="@{/rejection?sample=true}" class="btn btn-sm btn-light text-danger border">Demo Sample</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Novelty Scoring -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 p-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="p-2 bg-success bg-opacity-10 text-success rounded-3 me-3">
+                                <i class="bi bi-grid-3x3-gap fs-4"></i>
+                            </div>
+                            <h5 class="card-title fw-bold mb-0">Novelty Scoring (NLP)</h5>
+                        </div>
+                        <p class="card-text text-muted small">
+                            Pure Java TF-IDF and Cosine Similarity scoring. Generates a color-coded novelty heatmap table demonstrating reduced prior-art overlap.
+                        </p>
+                        <div class="d-flex gap-2 mt-3">
+                            <a th:href="@{/novelty}" class="btn btn-outline-success btn-sm">Launch Tool</a>
+                            <a th:href="@{/novelty?sample=true}" class="btn btn-sm btn-light text-success border">Demo Sample</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Blockchain Proof -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 p-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="p-2 bg-info bg-opacity-10 text-info rounded-3 me-3">
+                                <i class="bi bi-link-45deg fs-4"></i>
+                            </div>
+                            <h5 class="card-title fw-bold mb-0">Proof-of-Invention</h5>
+                        </div>
+                        <p class="card-text text-muted small">
+                            Cryptographic timestamping using SHA-256 blocks with Proof-of-Work. Includes full chain tamper detection and document fingerprint verification.
+                        </p>
+                        <div class="d-flex gap-2 mt-3">
+                            <a th:href="@{/blockchain}" class="btn btn-outline-info btn-sm">View Ledger</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Prior-Art Search -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 p-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="p-2 bg-warning bg-opacity-10 text-warning-emphasis rounded-3 me-3">
+                                <i class="bi bi-search fs-4"></i>
+                            </div>
+                            <h5 class="card-title fw-bold mb-0">Prior-Art Search</h5>
+                        </div>
+                        <p class="card-text text-muted small">
+                            Extracts salient claim keywords via TF-IDF and queries Semantic Scholar & OpenAlex open APIs with graceful offline fallback.
+                        </p>
+                        <div class="d-flex gap-2 mt-3">
+                            <a th:href="@{/prior-art}" class="btn btn-outline-warning btn-sm">Search Literature</a>
+                            <a th:href="@{/prior-art?sample=true}" class="btn btn-sm btn-light border">Demo Sample</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Originality Indicator -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 p-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="p-2 bg-secondary bg-opacity-10 text-secondary rounded-3 me-3">
+                                <i class="bi bi-fingerprint fs-4"></i>
+                            </div>
+                            <h5 class="card-title fw-bold mb-0">Originality Indicator</h5>
+                        </div>
+                        <p class="card-text text-muted small">
+                            Computes stylometry heuristics: sentence-length variance (burstiness), Type-Token Ratio (TTR), and repeated n-grams to estimate AI-likeness risk.
+                        </p>
+                        <div class="d-flex gap-2 mt-3">
+                            <a th:href="@{/originality}" class="btn btn-outline-secondary btn-sm">Evaluate Text</a>
+                            <a th:href="@{/originality?sample=true}" class="btn btn-sm btn-light border">Demo Sample</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Analyses Table -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history text-secondary me-2"></i>Recent Prosecution Activity</h5>
+                <span class="badge bg-light text-dark border">H2 Persistent Storage</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 15%;">Module</th>
+                                <th style="width: 30%;">Analysis Title</th>
+                                <th style="width: 40%;">Executive Summary</th>
+                                <th style="width: 15%;">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(recentActivities)}">
+                                <td colspan="4" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox fs-3 d-block mb-1"></i>
+                                    No analyses recorded yet. Click one of the "Demo Sample" buttons above to immediately populate the workspace!
+                                </td>
+                            </tr>
+                            <tr th:each="act : ${recentActivities}">
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1"
+                                          th:text="${act.analysisType}">COMPARE</span>
+                                </td>
+                                <td class="fw-semibold text-dark" th:text="${act.title}">Patent Comparison</td>
+                                <td class="small text-muted" th:text="${act.summary}">Summary of analysis results...</td>
+                                <td class="small text-secondary"
+                                    th:text="${#temporals.format(act.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2026-10-30</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

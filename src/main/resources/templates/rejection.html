@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Office Action Rejection Explainer | PatentLens</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="container py-4">
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold text-dark mb-1"><i class="bi bi-cpu text-danger me-2"></i>Examiner Rejection Explainer</h2>
+                <p class="text-muted mb-0">Rule-based detection of 35 U.S.C. 101, 102, 103, 112 with AI-generated plain language explanations and claim amendments.</p>
+            </div>
+            <div>
+                <a th:href="@{/rejection?sample=true}" class="btn btn-outline-danger">
+                    <i class="bi bi-magic me-1"></i> Load USPTO Office Action Sample
+                </a>
+            </div>
+        </div>
+
+        <!-- Alert messages -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${errorMessage}">Error occurred</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${isSample}" class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <strong>Demo Office Action Loaded:</strong> USPTO Non-Final Rejection citing 35 U.S.C. 101 (Alice Step 2B), 102 (Anticipation by Smith et al.), 103 (Obviousness with Johnson), and 112 (Antecedent Basis).
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Input Form Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-file-earmark-text me-2"></i>Provide Examiner's Office Action</h5>
+            </div>
+            <div class="card-body p-4">
+                <form th:action="@{/rejection}" method="post" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold text-dark">
+                                Office Action Text (or upload PDF below)
+                            </label>
+                            <textarea name="officeActionText" class="form-control font-monospace" rows="10"
+                                      placeholder="Paste examiner's rejection text here..."
+                                      th:text="${officeActionText}"></textarea>
+                            <div class="mt-2">
+                                <label class="form-label small text-muted">Or upload Office Action PDF/TXT:</label>
+                                <input type="file" name="officeActionFile" class="form-control form-control-sm" accept=".pdf,.txt">
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold text-dark">
+                                Optional: Current Patent Claims
+                            </label>
+                            <textarea name="patentDraftText" class="form-control font-monospace" rows="10"
+                                      placeholder="Paste your current claims to help generate tailored amendments..."
+                                      th:text="${patentDraftText}"></textarea>
+                            <div class="form-text small">Helps the LLM tailor amendments directly against your existing claim numbering.</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="small text-muted">
+                            <i class="bi bi-shield-check text-success me-1"></i> Automatic Mock fallback enabled if no API key is specified.
+                        </div>
+                        <button type="submit" class="btn btn-danger px-4 py-2">
+                            <i class="bi bi-lightning-charge-fill me-1"></i> Analyze Rejections & Generate Amendments
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Analysis Results Display -->
+        <div th:if="${analysis != null}">
+
+            <!-- Execution Banner -->
+            <div class="card border-0 shadow-sm mb-4 bg-white">
+                <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <span class="fw-bold text-dark fs-5">
+                            <i class="bi bi-check2-circle text-success me-2"></i>Prosecution Analysis Complete
+                        </span>
+                        <div class="text-muted small">
+                            Identified <span class="fw-bold text-dark" th:text="${analysis.totalRejections}">4</span> statutory rejection grounds in the examiner's action.
+                        </div>
+                    </div>
+                    <div>
+                        <span th:if="${analysis.usedMock}" class="badge bg-secondary-subtle text-secondary border px-3 py-2">
+                            <i class="bi bi-cpu me-1"></i> Deterministic Prosecution Engine (Offline Mode)
+                        </span>
+                        <span th:unless="${analysis.usedMock}" class="badge bg-success-subtle text-success border px-3 py-2">
+                            <i class="bi bi-cloud-check-fill me-1"></i> Live LLM API Output
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Strategy Card -->
+            <div class="card border-0 shadow-sm mb-4 bg-light border-start border-4 border-primary">
+                <div class="card-body">
+                    <h5 class="fw-bold text-dark mb-2"><i class="bi bi-compass text-primary me-2"></i>Recommended Prosecution Strategy</h5>
+                    <pre class="mb-0 text-dark font-monospace small" style="white-space: pre-wrap;" th:text="${analysis.overallStrategy}">Prosecution Strategy Summary</pre>
+                </div>
+            </div>
+
+            <!-- Rejection Ground Cards List -->
+            <div class="d-flex flex-column gap-4">
+                <div th:each="rej, stat : ${analysis.detectedRejections}" class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <span class="badge me-2 px-3 py-2 fs-6" th:classappend="${rej.badgeClass}" th:text="${rej.ground}">35 U.S.C. 102</span>
+                            <span class="fw-bold text-dark" th:text="${rej.rejectedClaims}">Claims 1, 2</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-1" th:if="${not #lists.isEmpty(rej.citedPriorArt)}">
+                            <span class="small text-muted me-1">Cited References:</span>
+                            <span th:each="art : ${rej.citedPriorArt}" class="badge bg-dark-subtle text-dark border me-1" th:text="${art}">US 2019/0084567</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+
+                        <!-- Examiner's Raw Text Excerpt -->
+                        <div class="mb-3">
+                            <span class="small fw-bold text-secondary text-uppercase d-block mb-1">
+                                <i class="bi bi-chat-quote-fill me-1"></i> Examiner's Written Action:
+                            </span>
+                            <div class="p-3 bg-light border rounded small text-dark fst-italic" th:text="${rej.rawExcerpt}">
+                                Raw rejection text from examiner...
+                            </div>
+                        </div>
+
+                        <!-- 1. Plain Language Reason -->
+                        <div class="mb-3">
+                            <span class="small fw-bold text-danger text-uppercase d-block mb-1">
+                                <i class="bi bi-lightbulb-fill me-1"></i> (1) Plain-Language Legal Reason:
+                            </span>
+                            <div class="p-3 bg-danger-subtle bg-opacity-25 border border-danger-subtle rounded text-dark" th:text="${rej.plainReason}">
+                                Explanation of rejection in plain language...
+                            </div>
+                        </div>
+
+                        <!-- 2. Suggested Amended Claim -->
+                        <div class="mb-3">
+                            <span class="small fw-bold text-success text-uppercase d-block mb-1">
+                                <i class="bi bi-pencil-fill me-1"></i> (2) Suggested Claim Amendment:
+                            </span>
+                            <div class="p-3 bg-white border border-success-subtle rounded font-monospace small text-dark" style="white-space: pre-wrap;" th:text="${rej.suggestedAmendment}">
+                                Suggested amended claim text...
+                            </div>
+                        </div>
+
+                        <!-- 3. Overcoming Argument -->
+                        <div>
+                            <span class="small fw-bold text-primary text-uppercase d-block mb-1">
+                                <i class="bi bi-shield-check me-1"></i> (3) Overcoming Rationale (Why this Amends around the Rejection):
+                            </span>
+                            <div class="p-3 bg-primary-subtle bg-opacity-25 border border-primary-subtle rounded text-dark small" th:text="${rej.overcomingArgument}">
+                                Legal argument showing why the amendment traverses the rejection...
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Follow-up Navigation -->
+            <div class="mt-4 text-center">
+                <a th:href="@{/novelty?sample=true}" class="btn btn-outline-success me-2">
+                    <i class="bi bi-grid-3x3-gap me-1"></i> Test Amended Claims in Novelty Heatmap
+                </a>
+                <a th:href="@{/prior-art?sample=true}" class="btn btn-outline-warning">
+                    <i class="bi bi-search me-1"></i> Discover Additional Prior-Art for Cited Concepts
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

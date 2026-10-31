@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>TF-IDF Novelty Scoring & Heatmap | PatentLens</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="container py-4">
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold text-dark mb-1"><i class="bi bi-grid-3x3-gap text-success me-2"></i>TF-IDF Novelty Scoring & Heatmap</h2>
+                <p class="text-muted mb-0">Computes Cosine Similarity against prior art using pure Java vector space NLP. Visualizes whether claim amendments successfully reduced overlap.</p>
+            </div>
+            <div>
+                <a th:href="@{/novelty?sample=true}" class="btn btn-outline-success">
+                    <i class="bi bi-magic me-1"></i> Load Drone Patent vs Smith Prior Art
+                </a>
+            </div>
+        </div>
+
+        <!-- Alert messages -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${errorMessage}">Error occurred</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${isSample}" class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <strong>Demo Dataset Loaded:</strong> Scoring original vs amended drone delivery claims against US 2019/0084567 A1 (Smith et al. aerial dispatch disclosure).
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Input Form Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-sliders me-2"></i>Novelty Evaluation Inputs</h5>
+            </div>
+            <div class="card-body p-4">
+                <form th:action="@{/novelty}" method="post" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold text-dark">
+                                <i class="bi bi-journal-check text-success me-1"></i> Amended Patent Draft (NEW) *
+                            </label>
+                            <textarea name="newText" class="form-control font-monospace" rows="8"
+                                      placeholder="Paste amended patent specification with claims..."
+                                      th:text="${newText}"></textarea>
+                            <div class="mt-2">
+                                <input type="file" name="newFile" class="form-control form-control-sm" accept=".pdf,.txt">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold text-dark">
+                                <i class="bi bi-journal-minus text-secondary me-1"></i> Original Patent Draft (OLD)
+                            </label>
+                            <textarea name="oldText" class="form-control font-monospace" rows="8"
+                                      placeholder="Paste pre-amendment draft to measure score delta..."
+                                      th:text="${oldText}"></textarea>
+                            <div class="mt-2">
+                                <input type="file" name="oldFile" class="form-control form-control-sm" accept=".pdf,.txt">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold text-dark">
+                                <i class="bi bi-book text-danger me-1"></i> Cited Prior-Art Document *
+                            </label>
+                            <textarea name="priorArtText" class="form-control font-monospace" rows="8"
+                                      placeholder="Paste cited prior art specification (e.g. Smith et al.)..."
+                                      th:text="${priorArtText}"></textarea>
+                            <div class="mt-2">
+                                <input type="file" name="priorArtFile" class="form-control form-control-sm" accept=".pdf,.txt">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-success px-4 py-2">
+                            <i class="bi bi-calculator-fill me-1"></i> Compute TF-IDF Novelty Heatmap
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Novelty Heatmap Results -->
+        <div th:if="${noveltyResult != null}">
+
+            <!-- Summary Metrics Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card p-3 text-center border-0 bg-white shadow-sm metric-card" style="border-left-color: #16a34a;">
+                        <span class="text-muted small fw-semibold text-uppercase">Amended Novelty Score</span>
+                        <h2 class="fw-bold text-success mb-0">
+                            <span th:text="${noveltyResult.averageNovelty}">78.4</span>%
+                        </h2>
+                        <span class="small text-muted mt-1">Average across new claims</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 text-center border-0 bg-white shadow-sm metric-card" style="border-left-color: #d97706;">
+                        <span class="text-muted small fw-semibold text-uppercase">Original Novelty Score</span>
+                        <h2 class="fw-bold text-warning mb-0">
+                            <span th:text="${noveltyResult.averageOldNovelty}">39.1</span>%
+                        </h2>
+                        <span class="small text-muted mt-1">Baseline pre-amendment overlap</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 text-center border-0 bg-white shadow-sm metric-card" style="border-left-color: #0284c7;">
+                        <span class="text-muted small fw-semibold text-uppercase">Prosecution Delta</span>
+                        <h2 class="fw-bold text-primary mb-0">
+                            +<span th:text="${noveltyResult.overallNoveltyImprovement}">39.3</span>%
+                        </h2>
+                        <span class="small text-success fw-semibold mt-1">
+                            <i class="bi bi-arrow-up-right-circle-fill"></i> Overlap successfully reduced
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Prior Art Keywords Badge Row -->
+            <div class="card border-0 shadow-sm p-3 mb-4 bg-white">
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                    <span class="fw-bold text-dark small text-uppercase me-2">
+                        <i class="bi bi-tags-fill text-primary me-1"></i> Distinctive Prior-Art Terms (TF-IDF):
+                    </span>
+                    <span th:each="kw : ${noveltyResult.topPriorArtKeywords}"
+                          class="badge bg-light text-dark border px-3 py-2 font-monospace"
+                          th:text="${kw}">quadcopter</span>
+                </div>
+            </div>
+
+            <!-- Heatmap Table Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-table me-2"></i>Claim Novelty Heatmap Table</h5>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-success-subtle text-success border px-2 py-1">&gt; 70% High Novelty</span>
+                        <span class="badge bg-warning-subtle text-warning-emphasis border px-2 py-1">40-70% Moderate</span>
+                        <span class="badge bg-danger-subtle text-danger border px-2 py-1">&lt; 40% High Overlap</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 8%;">Claim</th>
+                                    <th style="width: 42%;">Amended Claim Text</th>
+                                    <th style="width: 14%;" class="text-center">Old Novelty</th>
+                                    <th style="width: 14%;" class="text-center">New Novelty</th>
+                                    <th style="width: 10%;" class="text-center">&Delta; Gain</th>
+                                    <th style="width: 12%;" class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="cmp : ${noveltyResult.claimComparisons}">
+                                    <td class="fw-bold text-center">
+                                        <span class="badge bg-dark rounded-circle p-2" th:text="${cmp.claimNumber}">1</span>
+                                    </td>
+                                    <td>
+                                        <div class="small font-monospace text-dark" style="max-height: 90px; overflow-y: auto;" th:text="${cmp.claimText}">
+                                            Claim body text...
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="fw-bold text-muted" th:text="${cmp.oldNoveltyScore} + '%'">42.0%</span>
+                                        <div class="progress mt-1" style="height: 4px;">
+                                            <div class="progress-bar bg-secondary" role="progressbar"
+                                                 th:style="'width: ' + ${cmp.oldNoveltyScore} + '%;'"></div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="fw-bold"
+                                              th:classappend="${cmp.statusColor == 'success' ? 'text-success' : (cmp.statusColor == 'warning' ? 'text-warning-emphasis' : 'text-danger')}"
+                                              th:text="${cmp.newNoveltyScore} + '%'">84.5%</span>
+                                        <div class="progress mt-1" style="height: 6px;">
+                                            <div class="progress-bar"
+                                                 th:classappend="${'bg-' + cmp.statusColor}"
+                                                 role="progressbar"
+                                                 th:style="'width: ' + ${cmp.newNoveltyScore} + '%;'"></div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary-subtle text-primary border px-2 py-1 fw-bold"
+                                              th:text="(${cmp.scoreDelta >= 0} ? '+' : '') + ${cmp.scoreDelta} + '%'">+42.5%</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge badge-pill"
+                                              th:classappend="${'bg-' + cmp.statusColor + (cmp.statusColor == 'warning' ? ' text-dark' : '')}"
+                                              th:text="${cmp.statusLabel}">High Novelty</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mathematical Algorithm Explanation (For Viva Defense) -->
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-mortarboard-fill text-primary me-2"></i>Algorithm Explanation & Viva Notes</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 bg-white border rounded h-100">
+                                <h6 class="fw-bold text-primary">1. Term Frequency (TF)</h6>
+                                <p class="small text-muted mb-0">
+                                    <code>TF(t, d) = count(t, d) / |d|</code><br>
+                                    Measures the relative density of term <i>t</i> within individual claim <i>d</i>, normalized against claim word count to prevent bias toward longer claims.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-white border rounded h-100">
+                                <h6 class="fw-bold text-primary">2. Inverse Doc Frequency (IDF)</h6>
+                                <p class="small text-muted mb-0">
+                                    <code>IDF(t) = ln((1+|D|) / (1+DF(t))) + 1</code><br>
+                                    Penalizes common patent boilerplate terms ("comprising", "system") while boosting distinctive technical limitation words ("octree", "pneumatic").
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-white border rounded h-100">
+                                <h6 class="fw-bold text-primary">3. Cosine Similarity Vector</h6>
+                                <p class="small text-muted mb-0">
+                                    <code>Cosine = (A . B) / (||A|| * ||B||)</code><br>
+                                    Computes angular directional overlap between claim vector and prior-art vector in Euclidean space. Novelty score is computed as <code>(1 - Cosine) * 100</code>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

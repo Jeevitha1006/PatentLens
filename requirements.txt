@@ -1,0 +1,140 @@
+================================================================================
+PATENTLENS: AI-POWERED PATENT REJECTION ANALYZER
+SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
+================================================================================
+
+1. PROJECT OVERVIEW & GOAL
+--------------------------------------------------------------------------------
+PatentLens is an AI-assisted patent prosecution and claim drafting platform.
+Its core mission is to automate the analysis of patent office rejections,
+guide claim amendments, quantify prior-art overlap, and provide mathematical
+proof-of-prior-invention using cryptography.
+
+The application must run 100% locally on a developer machine with zero
+compulsory external cloud services or paid subscriptions.
+
+
+2. FUNCTIONAL REQUIREMENTS (CORE FEATURES)
+--------------------------------------------------------------------------------
+
+[FR-01] UPLOAD & CLAIM COMPARISON
+  - FR-01.1: System shall accept patent specifications via file upload (PDF, TXT)
+             or direct clipboard text pasting.
+  - FR-01.2: System shall automatically detect and isolate the claims section
+             and parse individual numbered claims using regular expressions.
+  - FR-01.3: System shall compare an original (pre-examination) draft against an
+             amended draft and categorize each claim as:
+             ADDED, REMOVED, MODIFIED, or UNCHANGED.
+  - FR-01.4: For modified claims, system shall generate a word-level side-by-side
+             visual diff highlighting additions (green) and deletions (red strikethrough).
+  - FR-01.5: System shall provide a 1-click sample button to load pre-built patent
+             drafts for immediate demonstration.
+
+[FR-02] EXAMINER REJECTION EXPLAINER
+  - FR-02.1: System shall accept an Examiner's Office Action (PDF or text).
+  - FR-02.2: System shall use rule-based pattern matching to detect statutory
+             rejection grounds under United States Patent Law:
+             * 35 U.S.C. 101 (Subject Matter Eligibility / Abstract Ideas)
+             * 35 U.S.C. 102 (Anticipation / Lack of Novelty)
+             * 35 U.S.C. 103 (Obviousness / Prior Art Combinations)
+             * 35 U.S.C. 112 (Definiteness / Lack of Antecedent Basis)
+  - FR-02.3: System shall identify the specific claim numbers rejected under each ground.
+  - FR-02.4: System shall extract cited prior-art patent numbers and inventor names
+             (e.g., US patent publication numbers, "Smith et al.").
+  - FR-02.5: System shall provide for each detected rejection:
+             (a) Plain-language explanation of why the rejection was made.
+             (b) Concrete suggested amended claim language.
+             (c) Legal overcoming rationale (why the amendment overcomes the ground).
+  - FR-02.6: System shall support dual-mode LLM execution: live HTTP API when an
+             API key is provided, and automatic fallback to a built-in deterministic
+             AI simulation engine when offline or unconfigured.
+
+[FR-03] NOVELTY SCORING & PRIOR-ART OVERLAP HEATMAP (NLP)
+  - FR-03.1: System shall evaluate patent claims against cited prior-art text
+             using pure vector-space NLP (TF-IDF + Cosine Similarity).
+  - FR-03.2: System shall compute a 0% - 100% Novelty Score for each claim
+             (where Novelty = (1.0 - Cosine Similarity) * 100).
+  - FR-03.3: System shall display a color-coded Novelty Heatmap table:
+             * Green: High Novelty (> 70%)
+             * Yellow: Moderate Overlap (40% - 70%)
+             * Red: High Prior-Art Overlap (< 40%)
+  - FR-03.4: System shall compute and display the score delta (gain/reduction)
+             between original and amended claims to verify if amendments
+             successfully reduced prior-art overlap.
+  - FR-03.5: System shall extract top distinctive prior-art keywords via TF-IDF.
+
+[FR-04] BLOCKCHAIN PROOF-OF-INVENTION
+  - FR-04.1: System shall maintain a persistent blockchain ledger where each block
+             contains: Index, Timestamp, SHA-256 Document Hash, Previous Hash,
+             Nonce, and Block Hash.
+  - FR-04.2: System shall implement Proof-of-Work (PoW) consensus requiring mined
+             block hashes to start with target leading zeros.
+  - FR-04.3: System shall automatically initialize a Genesis Block on first boot.
+  - FR-04.4: System shall allow users to timestamp patent drafts into the chain.
+  - FR-04.5: System shall provide a "Verify Integrity" function that audits the
+             entire ledger to detect data tampering or broken cryptographic pointers.
+  - FR-04.6: System shall provide a "Verify Document" function where a user uploads
+             a draft to verify whether its SHA-256 fingerprint exists in the chain.
+
+[FR-05] SCHOLARLY PRIOR-ART SEARCH
+  - FR-05.1: System shall extract top technical keywords from patent claims using TF-IDF.
+  - FR-05.2: System shall query public research APIs (Semantic Scholar and OpenAlex)
+             without requiring personal API keys.
+  - FR-05.3: System shall display paper title, authors, publication year, abstract,
+             and external DOI link.
+  - FR-05.4: System shall gracefully handle network unavailability or timeouts
+             by displaying cached/curated relevant academic references.
+
+[FR-06] ORIGINALITY & STYLOMETRY INDICATOR
+  - FR-06.1: System shall calculate text stylometry metrics:
+             * Sentence-length variance / burstiness (sigma^2)
+             * Type-Token Ratio (TTR = unique words / total words)
+             * Repeated n-gram rates (bi-grams and tri-grams)
+  - FR-06.2: System shall synthesize these metrics into a 0 - 100 "AI-Likeness Risk"
+             gauge indicator.
+  - FR-06.3: System shall explicitly display the disclaimer:
+             "Drafting aid only, not legal advice. Stylometry heuristics provide
+             probabilistic structural indicators and do not constitute legal
+             proof of authorship."
+
+[FR-07] EXECUTIVE DASHBOARD & PROSECUTION HISTORY
+  - FR-07.1: System shall provide summary cards displaying blockchain height,
+             total completed analyses, rejection grounds coverage, and NLP stats.
+  - FR-07.2: System shall maintain a persistent history of all user analyses.
+  - FR-07.3: System shall display quick navigation launchers for all modules.
+
+
+3. NON-FUNCTIONAL REQUIREMENTS
+--------------------------------------------------------------------------------
+
+[NFR-01] LOCAL EXECUTION & INDEPENDENCE
+  - The software must run entirely on a local machine with zero mandatory external
+    databases, Docker containers, or paid cloud services.
+
+[NFR-02] FAULT TOLERANCE & OFFLINE RESILIENCE
+  - No module shall crash due to lack of an internet connection or missing API keys.
+  - External services (LLM API, Semantic Scholar, OpenAlex) must feature seamless
+    automatic fallback to pre-loaded realistic data.
+
+[NFR-03] PERFORMANCE & RESPONSIVENESS
+  - Text parsing and claim extraction shall execute in under 1 second.
+  - TF-IDF novelty scoring shall execute in under 2 seconds.
+  - Blockchain Proof-of-Work mining shall execute locally in under 200 ms.
+
+[NFR-04] DATA PERSISTENCE
+  - All blockchain blocks and analysis audit logs must persist across application
+    restarts using local file-based storage.
+
+[NFR-05] USABILITY & PRESENTATION READINESS
+  - User interface shall be clean, responsive, and styled with accessible color contrast.
+  - Every core module shall feature a 1-click "Demo Sample" button to facilitate
+    live academic presentations and viva defenses without manual file browsing.
+
+
+4. COMPLIANCE & LEGAL SAFEGUARDS
+--------------------------------------------------------------------------------
+- Every page shall prominently display the footer disclaimer:
+  "Drafting aid only, not legal advice."
+- The application must position itself strictly as a drafting and analytical aid
+  for patent practitioners, not as a replacement for legal counsel.
+================================================================================

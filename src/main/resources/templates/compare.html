@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Upload & Compare Patent Drafts | PatentLens</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="container py-4">
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold text-dark mb-1"><i class="bi bi-layout-split text-primary me-2"></i>Patent Draft Claim Diff</h2>
+                <p class="text-muted mb-0">Upload or paste OLD (pre-examination) and NEW (amended) patent drafts to inspect claim alterations.</p>
+            </div>
+            <div>
+                <a th:href="@{/compare?sample=true}" class="btn btn-outline-primary">
+                    <i class="bi bi-magic me-1"></i> Load Pre-Examination vs Amended Sample
+                </a>
+            </div>
+        </div>
+
+        <!-- Alert messages -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${errorMessage}">Error occurred</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${isSample}" class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <strong>Demo Sample Loaded:</strong> Comparing Drone Dispatch System (Pre-examination broad draft) vs Amended Safe-Descent Draft.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Input Form Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3">
+                <ul class="nav nav-pills card-header-pills" id="inputTab" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#textInputPane" type="button">
+                            <i class="bi bi-textarea-t me-1"></i> Paste Text
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="file-tab" data-bs-toggle="tab" data-bs-target="#fileInputPane" type="button">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Upload Files (PDF / TXT)
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-4">
+                <form th:action="@{/compare}" method="post" enctype="multipart/form-data">
+                    <div class="tab-content" id="inputTabContent">
+
+                        <!-- Text Area Tab -->
+                        <div class="tab-pane fade show active" id="textInputPane">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark">
+                                        <i class="bi bi-file-earmark-minus text-danger me-1"></i> OLD Patent Draft (Original Specification)
+                                    </label>
+                                    <textarea name="oldText" class="form-control font-monospace" rows="10"
+                                              placeholder="Paste original patent draft with claims..."
+                                              th:text="${oldText}"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark">
+                                        <i class="bi bi-file-earmark-plus text-success me-1"></i> NEW Patent Draft (Amended Specification)
+                                    </label>
+                                    <textarea name="newText" class="form-control font-monospace" rows="10"
+                                              placeholder="Paste amended patent draft with claims..."
+                                              th:text="${newText}"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File Upload Tab -->
+                        <div class="tab-pane fade" id="fileInputPane">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark">Upload Original Draft (PDF or TXT)</label>
+                                    <input type="file" name="oldFile" class="form-control" accept=".pdf,.txt">
+                                    <div class="form-text">PDF text is automatically extracted using Apache PDFBox.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark">Upload Amended Draft (PDF or TXT)</label>
+                                    <input type="file" name="newFile" class="form-control" accept=".pdf,.txt">
+                                    <div class="form-text">All claim sections will be automatically detected and isolated.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-primary px-4 py-2">
+                            <i class="bi bi-arrow-left-right me-1"></i> Run Claim Diff Analysis
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Diff Results Display -->
+        <div th:if="${diffResult != null}">
+
+            <!-- Summary Metrics Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-2">
+                    <div class="card p-3 text-center border-0 bg-white shadow-sm">
+                        <span class="text-muted small fw-semibold text-uppercase">Old Claims</span>
+                        <h3 class="fw-bold text-secondary mb-0" th:text="${diffResult.totalOldClaims}">0</h3>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="card p-3 text-center border-0 bg-white shadow-sm">
+                        <span class="text-muted small fw-semibold text-uppercase">New Claims</span>
+                        <h3 class="fw-bold text-dark mb-0" th:text="${diffResult.totalNewClaims}">0</h3>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="card p-3 text-center border-0 bg-white shadow-sm">
+                        <span class="text-success small fw-semibold text-uppercase">Added</span>
+                        <h3 class="fw-bold text-success mb-0" th:text="${diffResult.addedCount}">0</h3>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="card p-3 text-center border-0 bg-white shadow-sm">
+                        <span class="text-warning small fw-semibold text-uppercase">Modified</span>
+                        <h3 class="fw-bold text-warning mb-0" th:text="${diffResult.modifiedCount}">0</h3>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="card p-3 text-center border-0 bg-white shadow-sm">
+                        <span class="text-danger small fw-semibold text-uppercase">Removed</span>
+                        <h3 class="fw-bold text-danger mb-0" th:text="${diffResult.removedCount}">0</h3>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="card p-3 text-center border-0 bg-white shadow-sm">
+                        <span class="text-muted small fw-semibold text-uppercase">Unchanged</span>
+                        <h3 class="fw-bold text-secondary mb-0" th:text="${diffResult.unchangedCount}">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Claim Diff Cards -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-file-diff me-2"></i>Claim-by-Claim Comparison</h5>
+                    <span class="badge bg-light text-dark border">Word-Level java-diff-utils</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div th:each="diff : ${diffResult.claimDiffs}"
+                             class="list-group-item p-4"
+                             th:classappend="${diff.status == 'ADDED' ? 'diff-added' : (diff.status == 'REMOVED' ? 'diff-removed' : (diff.status == 'MODIFIED' ? 'diff-modified' : 'diff-unchanged'))}">
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-0">
+                                    <i class="bi bi-bookmark-check-fill me-1 text-primary"></i>
+                                    Claim <span th:text="${diff.claimNumber}">1</span>
+                                </h6>
+                                <span class="badge badge-pill" th:classappend="${diff.badgeClass}" th:text="${diff.status}">MODIFIED</span>
+                            </div>
+
+                            <!-- Modified: Show Word-level Highlighted Diff -->
+                            <div th:if="${diff.status == 'MODIFIED'}" class="mt-2">
+                                <div class="p-3 bg-white border rounded shadow-sm">
+                                    <span class="small text-muted fw-semibold text-uppercase d-block mb-1">
+                                        <i class="bi bi-pencil-square text-warning me-1"></i> Word-Level Changes (<del class="bg-danger-subtle text-danger px-1">Removed</del> / <ins class="bg-success-subtle text-success px-1">Added</ins>):
+                                    </span>
+                                    <div class="font-monospace small" th:utext="${diff.diffHtml}">Diff HTML</div>
+                                </div>
+                                <div class="row g-2 mt-2">
+                                    <div class="col-md-6">
+                                        <div class="p-2 bg-light border rounded small">
+                                            <span class="fw-semibold text-secondary d-block">Original Text:</span>
+                                            <span class="text-muted" th:text="${diff.oldText}">Old text</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-2 bg-light border rounded small">
+                                            <span class="fw-semibold text-success d-block">Amended Text:</span>
+                                            <span class="text-dark" th:text="${diff.newText}">New text</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Added: Show New Claim Body -->
+                            <div th:if="${diff.status == 'ADDED'}" class="mt-2">
+                                <div class="p-3 bg-white border border-success-subtle rounded">
+                                    <span class="small text-success fw-semibold text-uppercase d-block mb-1">Newly Introduced Claim:</span>
+                                    <div class="font-monospace small text-dark" th:text="${diff.newText}">Added claim text</div>
+                                </div>
+                            </div>
+
+                            <!-- Removed: Show Old Deleted Claim Body -->
+                            <div th:if="${diff.status == 'REMOVED'}" class="mt-2">
+                                <div class="p-3 bg-white border border-danger-subtle rounded">
+                                    <span class="small text-danger fw-semibold text-uppercase d-block mb-1">Cancelled Claim:</span>
+                                    <div class="font-monospace small text-decoration-line-through text-muted" th:text="${diff.oldText}">Cancelled claim text</div>
+                                </div>
+                            </div>
+
+                            <!-- Unchanged -->
+                            <div th:if="${diff.status == 'UNCHANGED'}" class="mt-2">
+                                <div class="p-3 bg-white border rounded">
+                                    <div class="font-monospace small text-muted" th:text="${diff.newText}">Unchanged text</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prosecution Action Shortcut -->
+            <div class="mt-4 text-center">
+                <a th:href="@{/novelty?sample=true}" class="btn btn-outline-success me-2">
+                    <i class="bi bi-grid-3x3-gap me-1"></i> Proceed to Novelty Scoring for these Claims
+                </a>
+                <a th:href="@{/blockchain}" class="btn btn-outline-info">
+                    <i class="bi bi-link-45deg me-1"></i> Anchor this Amended Draft to Blockchain
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

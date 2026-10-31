@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Error | PatentLens</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="container py-5 text-center">
+        <div class="row justify-content-center">
+            <div class="col-md-7">
+                <div class="card p-5 border-0 shadow-sm">
+                    <div class="mb-4">
+                        <i class="bi bi-exclamation-triangle-fill display-3 text-warning"></i>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-2">Prosecution Processing Issue</h2>
+                    <p class="lead text-muted mb-4" th:text="${errorMessage}">
+                        An error occurred while analyzing the patent draft or office action.
+                    </p>
+                    <div class="alert alert-light text-start small font-monospace mb-4 border" th:if="${exceptionDetails != null}">
+                        <span class="text-danger fw-bold">Diagnostic Trace:</span>
+                        <div class="mt-1 text-muted text-break" th:text="${exceptionDetails}">Exception details</div>
+                    </div>
+                    <div>
+                        <a th:href="@{/}" class="btn btn-primary px-4 py-2">
+                            <i class="bi bi-arrow-left me-1"></i> Return to PatentLens Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

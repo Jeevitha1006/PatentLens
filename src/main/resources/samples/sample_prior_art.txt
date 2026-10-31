@@ -1,0 +1,5 @@
+PRIOR ART REFERENCE: US 2019/0084567 A1 (Smith et al.)
+TITLE: AUTONOMOUS AERIAL DISPATCH SYSTEM
+
+ABSTRACT & RELEVANT SPECIFICATION:
+Disclosed is an autonomous parcel dispatch system comprising multi-rotor unmanned aerial vehicles (UAVs) equipped with onboard microcontrollers and GPS receivers. The UAV receives dispatch coordinates from a central logistics dispatcher and computes flight routes taking into consideration global weather forecast feeds. The aircraft descends to the target coordinate and drops or lowers the payload by an electronic hook. Obstacles along the macro-path are routed around using conventional waypoint alterations based on airspace maps.

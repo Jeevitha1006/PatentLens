@@ -1,0 +1,20 @@
+PATENT DRAFT: OLD SPECIFICATION (PRE-EXAMINATION)
+TITLE: AUTONOMOUS UNMANNED AERIAL VEHICLE DISPATCH AND DELIVERY PLATFORM
+
+CLAIMS:
+
+1. A system for autonomous package delivery, comprising:
+an unmanned aerial vehicle (UAV) having a plurality of propulsion rotors;
+a global positioning system (GPS) receiver; and
+a processor configured to receive delivery coordinates and navigate the UAV to the delivery coordinates to discharge a payload.
+
+2. The system of claim 1, wherein the processor calculates an optimal flight trajectory using cloud-based weather telemetry.
+
+3. The system of claim 1, further comprising an optical sensor array configured to identify ground landing obstacles.
+
+4. The system of claim 3, wherein said optical sensor array causes the UAV to hover until said ground landing obstacle clears.
+
+5. A computer-implemented method for delivering goods, comprising:
+receiving, by a server, a purchase order comprising a customer destination;
+transmitting the customer destination to an autonomous drone; and
+directing the autonomous drone to fly toward the customer destination without human intervention.

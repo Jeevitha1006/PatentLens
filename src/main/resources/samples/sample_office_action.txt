@@ -1,0 +1,23 @@
+UNITED STATES PATENT AND TRADEMARK OFFICE (USPTO)
+BEFORE THE PATENT EXAMINING CORPS
+
+Application No.: 17/889,102
+Filing Date: June 15, 2022
+Examiner: Miller, Jonathan
+Art Unit: 3684
+
+NON-FINAL OFFICE ACTION SUMMARY
+
+Detailed Action:
+
+1. Rejection under 35 U.S.C. 101:
+Claims 5 is rejected under 35 U.S.C. 101 because the claimed invention is directed to a judicial exception (i.e., an abstract idea of receiving order data and coordinating delivery logistics) without reciting significantly more under the Alice Step 2B framework. The generic computer components ("server", "autonomous drone") perform routine and well-understood functional steps.
+
+2. Rejection under 35 U.S.C. 102:
+Claims 1-2 are rejected under 35 U.S.C. 102(a)(1) as being anticipated by US Patent Publication No. US 2019/0084567 A1 to Smith et al. ("Autonomous Aerial Dispatch System"). Smith discloses an unmanned aerial vehicle with rotors, GPS receiver, and flight processor that receives destination coordinates and autonomously navigates to discharge parcels (see Smith, paragraphs [0034]-[0052], Figure 3). Smith further discloses retrieving weather telemetry for route calculation.
+
+3. Rejection under 35 U.S.C. 103:
+Claim 3 is rejected under 35 U.S.C. 103 as being unpatentable over US 2019/0084567 A1 (Smith et al.) in view of US Patent Publication No. US 2021/0043210 A1 to Johnson ("Optical Obstacle Avoidance for Small Aircraft"). While Smith discloses general autonomous navigation, Johnson teaches utilizing downward optical sensors on an aircraft to identify ground landing obstacles. It would have been obvious to a Person Having Ordinary Skill in the Art (POSITA) at the time of the invention to incorporate Johnson's optical sensor onto Smith's UAV to prevent collisions with ground obstructions during touchdown.
+
+4. Rejection under 35 U.S.C. 112:
+Claim 4 is rejected under 35 U.S.C. 112(b) or 35 U.S.C. 112 (pre-AIA), second paragraph, as being indefinite for failing to particularly point out and distinctly claim the subject matter. Specifically, Claim 4 recites "said ground landing obstacle", but lacks antecedent basis in Claim 3, which merely introduced "ground landing obstacles" in the plural without clarifying single entity reference.
